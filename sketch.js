@@ -5,6 +5,22 @@
 // ==========================================
 
 let phase = 0;
+// ==========================================
+// SOUND VARIABLES (add at the top)
+// ==========================================
+
+let rocketSound;
+let soundStarted = false;
+let soundStopped = false;
+
+// ==========================================
+// PRELOAD (add this function before setup())
+// ==========================================
+
+function preload() {
+  soundFormats('mp3', 'wav', 'ogg');
+  rocketSound = loadSound('launch.mp3'); // ← replace with your actual filename
+}
 
 // ==========================================
 // PHASE 1 VARIABLES
@@ -87,6 +103,32 @@ function draw() {
   if (phase == 0) {
 
     drawLaunchScene();
+    if (launched) {
+
+  rocketY -= 2.8;
+
+  velocity = rocketY - prevRocketY;
+  speedValue = abs(velocity);
+  prevRocketY = rocketY;
+
+  // ── SOUND LOGIC ──────────────────────────────
+  // timeLapse 0.8 means rocketY has moved 80% toward dismantling threshold
+  // Dismantling starts at missionStage 1 (first mouse click after launch)
+  // We use rocketY to estimate the 0.8 mark
+
+  let dismantleThreshold = +200; // approx Y when player typically clicks to dismantle
+  let soundTriggerY = dismantleThreshold; // 80% of the way there = -480
+
+  if (!soundStarted && rocketY < soundTriggerY) {
+    rocketSound.loop();   // or rocketSound.play() if it shouldn't loop
+    soundStarted = true;
+  }
+
+  if (!soundStopped && missionStage >= 1) {
+    rocketSound.stop();
+    soundStopped = true;
+  }
+}
   }
 
   else if (phase == 1) {
@@ -1034,3 +1076,4 @@ class Smoke {
     );
   }
 }
+
